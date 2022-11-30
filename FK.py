@@ -2,6 +2,7 @@ import leg_model
 import numpy as np
 from matplotlib import pyplot as plt
 
+
 class FK:
 
     @staticmethod
@@ -15,40 +16,82 @@ class FK:
 
 
 
-    def FK(self, leg: leg_model, basepoint):
-        points = np.empty((leg.joints+1,3))
-        points[0] = basepoint
+    def __init__(self, leg: leg_model, basepoint):
         self.basepoint = basepoint
-        self.T = np.array([[0]*4]*4)
-        for i in range(leg.joints):
-            if i == 0:
-                T = np.round(FK.DHMatrix(leg.theta[i], leg.alpha[i], leg.r[i],leg.d[i]),decimals=5)
-            else: 
-                T = np.round(np.matmul(T,FK.DHMatrix(leg.theta[i], leg.alpha[i], leg.r[i],leg.d[i])),decimals=5)
-            print(T)
-            
-            points[i+1] = T[:3,3:].reshape(1,3) + points[0]
-            
-        return points
+        self.joints = leg.joints
+        self.T = np.zeros((self.joints+1,4,4))
+        self.T[0] = np.identity(4)
+        for i in range(self.joints):
+            self.T[i+1] = np.round(np.matmul(self.T[i],FK.DHMatrix(leg.theta[i], leg.alpha[i], leg.r[i],leg.d[i])),decimals=5)
+            #print(self.T[i+1])
     
-    def i_j_Transform(i,j): 
+    def j_Transform(self,j): 
+        """gets Transform matrix to j point, with 0 being base and self.joints being end effector"""
+        try:
+            if j > self.joints:
+                raise ValueError("non-valid index")
+        except ValueError as e:
+            print(e)
+            return
+        return self.T[j]
+
+    def j_point(self,j):
+        try:
+            if j > self.joints:
+                raise ValueError("non-valid index")
+        except ValueError as e:
+            print(e)
+            return -1
+        return self.basepoint + self.T[j][:3,3:].reshape(1,3)
+
+    def EE_pos(self):
+        return self.basepoint + self.T[self.joints][:3,3:].reshape(1,3)
+    
+class FK_dynamic(FK):
+
+    def __init__(self, leg: leg_model, basepoint, valid_points):
+        """stores the DH values to be able to do multiple """
+        super().__init__(leg, basepoint)
+        self.model = leg
+        self.valid = valid_points
+    
+    def recalibrate_T(self):
+        """Reinitialize the transformation matrix"""
+        for i in range(self.joints):
+            self.T[i+1] = np.round(np.matmul(self.T[i],FK.DHMatrix(self.model.theta[i], self.model.alpha[i], self.model.r[i],self.model.d[i])),decimals=5)
+    def update_theta(self,theta):
+        """update the joint position"""
+        self.model.theta = theta
+        self.recalibrate_T()
+    #def update_alpha(self,alpha): #will not be modifying alpha will always be pi/2, 0, 0, since it defines the leg
+    #    """update the joint position"""
+    #    self.alpha = alpha
+    #    self.recalibrate_T(self)
+    
         
-        for k in range(i+1,j):
-        return 
-
-    def EE_pos():
-
-
-theta = np.array([-np.pi/2,np.pi/4,-1*np.pi/2])
-alpha = np.array([np.pi/2,0,0])
-d = np.array([0,0,0])
-r = np.array([0.25,1,1])
-base = np.array([0,2,0])
-joints = 3
+"""
+theta = np.array([np.pi/2,0,0,-np.pi/2,-np.pi/4])
+alpha = np.array([0,np.pi/2,0,0,0])
+d = np.array([0,0,0.25,0,0])
+r = np.array([0,0,0,1,1])
+base = np.array([0,0,2])
+joints = 5
+valid = np.array([True,False,False,True,True])
 leg = leg_model.leg_model(theta, r,d,alpha,base,joints)
-ee = FK.FK(leg, base)
-print(ee)
+ 
+forward  = FK(leg, base)
+ee = np.array([[0.0]*3]*(leg.joints+1))
+for i in range(leg.joints+1):
+    ee[i] = forward.j_point(i)
+
+
+print(a)
 fig = plt.figure()
 ax = fig.add_subplot(projection='3d')
 ax.plot([x[0] for x in ee], [x[1] for x in ee],[x[2] for x in ee] )
+ax.axes.set_xlim3d(left=-1, right=1) 
+ax.axes.set_ylim3d(bottom=-1, top=1) 
+ax.axes.set_zlim3d(bottom=0, top=2.5) 
 fig.savefig('endeffector.png')
+
+"""
