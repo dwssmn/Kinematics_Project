@@ -29,7 +29,7 @@ def bezierCurveFit(resolution, begin, height, f_dist, s_dist):
     return bezierCurve(np.linspace(0,1,resolution), points, 3)
 
 
-
+"""
 begin = np.array([0.25, -0.37, 0])
 num = 14
 curve = bezierCurveFit(num,begin, 0.3,.75,0) #bezierCurve(times, points)
@@ -71,5 +71,6 @@ ax.plot([x[0] for x in curve], [x[1] for x in curve],[x[2] for x in curve] )
 ax.axes.set_xlim3d(left=-1, right=1) 
 ax.axes.set_ylim3d(bottom=-1, top=1) 
 ax.axes.set_zlim3d(bottom=0, top=2.5) 
-fig.savefig('test.png')
+fig.show()
 
+"""

@@ -65,6 +65,9 @@ class IK:
             return [0,0,1]
         elif i >1:
             return [np.sin(self.model.alpha[1])*np.sin(self.model.theta[0]),np.sin(self.model.alpha[1])*np.cos(self.model.theta[0]),np.cos(self.model.alpha[1])]
+
+    def returnFK(self):
+        return self.FKdynamic
 """
 theta = np.array([np.pi/2,0,0,-np.pi/2,-np.pi/4])
 alpha = np.array([0,np.pi/2,0,0,0])

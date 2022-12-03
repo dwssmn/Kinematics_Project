@@ -63,6 +63,11 @@ class FK_dynamic(FK):
         """update the joint position"""
         self.model.theta = theta
         self.recalibrate_T()
+    def update_base(self,base):
+        self.basepoint = base
+        self.recalibrate_T()
+    def return_leg(self):
+        return self.model
     #def update_alpha(self,alpha): #will not be modifying alpha will always be pi/2, 0, 0, since it defines the leg
     #    """update the joint position"""
     #    self.alpha = alpha
