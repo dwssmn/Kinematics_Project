@@ -9,11 +9,13 @@ from FK import FK
 class IK:
 
     def __init__(self, model: leg_model,basepoint, accuracy, valid):
+        """Initializes the accuracy and leg"""
         self.FKdynamic = FK_dynamic(model, basepoint, valid)
         self.model = model
         self.accuracy = accuracy
     
     def Inverse_Kinematics(self, target: np.array):
+        """Attempts to move the leg to the target"""
         ee = self.FKdynamic.EE_pos()
         #print("ee: ")
         #print(ee)
@@ -48,6 +50,7 @@ class IK:
         return
 
     def Jacobian(self):
+        """Jacobian returns the matrix of joint rotations to end effetor translations dx/dtheta for each point"""
         J = np.array([[0.0]*(self.model.joints-2)] *3)
         k = 0
         jpoints = np.arange(0,self.model.joints,1)[self.FKdynamic.valid]
@@ -59,6 +62,7 @@ class IK:
         return J
 
     def getRotationAxis(self,i):
+        """Gets the rotational axes for each significant joint"""
         if i == 0:
             return [0,0,1]
         elif i ==1:
@@ -68,31 +72,3 @@ class IK:
 
     def returnFK(self):
         return self.FKdynamic
-"""
-theta = np.array([np.pi/2,0,0,-np.pi/2,-np.pi/4])
-alpha = np.array([0,np.pi/2,0,0,0])
-d = np.array([0,0,0.25,0,0])
-r = np.array([0,0,0,1,1])
-base = np.array([0,0,2])
-valid = np.array([True,False,False,True,True])
-joints = 5
-leg = leg_model.leg_model(theta, r,d,alpha,base,joints)
-ik = IK(leg,base,0.02,valid)
-target = np.array([0.25, -0.5, 0])
-print(ik.FKdynamic.model.theta)
-ik.Inverse_Kinematics(target)
-print(ik.FKdynamic.model.theta)
-
-ee = np.array([[0.0]*3]*(leg.joints+1))
-for i in range(leg.joints+1):
-    ee[i] = ik.FKdynamic.j_point(i)
-
-print(ee)
-fig = plt.figure()
-ax = fig.add_subplot(projection='3d')
-ax.plot([x[0] for x in ee], [x[1] for x in ee],[x[2] for x in ee] )
-ax.axes.set_xlim3d(left=-1, right=1) 
-ax.axes.set_ylim3d(bottom=-1, top=1) 
-ax.axes.set_zlim3d(bottom=0, top=2.5) 
-fig.savefig('IK_end_effector.png')
-"""
