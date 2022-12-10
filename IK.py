@@ -1,6 +1,4 @@
 import numpy as np
-from itertools import chain
-import matplotlib.pyplot as plt
 
 import leg_model
 from FK import FK_dynamic
