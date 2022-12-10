@@ -6,11 +6,12 @@ import numpy as np
 import FK
 class plotter():
     def __init__(self):
-        self.fig = plt.figure()
-        self.ax = self.fig.add_subplot(projection='3d')
         self.output = "default"
     def plotLeg(self, fk:FK.FK,multi=False):
         """Plots a single leg"""
+        if not multi:
+            self.fig = plt.figure()
+            self.ax = self.fig.add_subplot(projection='3d')
         ee = np.array([[0.0]*3]*(fk.joints+1))
         for i in range(fk.joints+1):
             ee[i] = fk.j_point(i)
@@ -23,6 +24,9 @@ class plotter():
             plt.clf()
     def plotCurve(self, curve,multi=False):
         """Plots a curve along a range"""
+        if not multi:
+            self.fig = plt.figure()
+            self.ax = self.fig.add_subplot(projection='3d')
         self.ax.plot([x[0] for x in curve], [x[1] for x in curve],[x[2] for x in curve] )
         self.setLimits(-1,-1,0,1,1,2.5)
 
@@ -30,6 +34,9 @@ class plotter():
         if not multi:
             self.fig.savefig(self.output + "_curve"+ ".png")
             plt.clf()
+    def initMulti(self):
+        self.fig = plt.figure()
+        self.ax = self.fig.add_subplot(projection='3d')
     def printMulti(self):
         """Print the result of multiple plots and clear"""
         self.fig.savefig(self.output + "_multi"+ ".png")

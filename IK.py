@@ -28,7 +28,7 @@ class IK:
             #use pseudoinverse since it is not guaranteed reversible
             #print(np.linalg.pinv(self.Jacobian()))
             #print(target-ee)
-            d_theta = np.transpose(0.1*np.matmul(np.linalg.pinv(self.Jacobian()), np.transpose(target-ee)))[0]
+            d_theta = np.transpose(0.01*np.matmul(np.linalg.pinv(self.Jacobian()), np.transpose(target-ee)))[0]
             #print("d_theta")
             #update the given theta
             d_theta = np.insert(d_theta, [1,1],[0.0,0.0],axis=0)
@@ -41,7 +41,7 @@ class IK:
             k=k+1
             
             try:
-                if k>500:
+                if k>1000:
                     raise ValueError("Inverse Kinematics has not converged -there is an error")
             except ValueError as e:
                 print(e)
